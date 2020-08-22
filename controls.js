@@ -4,7 +4,6 @@ module.exports = {
             return options.includes(reaction.emoji.name) && user.id === msg.author.id;
         };
 
-
         var result = new Promise(function (resolve, reject) {
             
             let i = 0;
@@ -28,8 +27,12 @@ module.exports = {
                     
                     for(let i = 0; i < options.length; i++) {
                         if (reaction.emoji.name === options[i]) {
-                            console.log(i + " was pressed");
-                            resolve(i);
+                            gmsg.reactions.removeAll().then(e => {
+                                resolve(i);
+                            }).catch(error => {
+                                console.error('Failed to clear reactions: ', error);
+                                resolve(i);
+                            });
                         }
                     }
                 })
@@ -39,6 +42,7 @@ module.exports = {
             }
 
         })
+
         return result;
     },
     createEmbed: function (title, color, description) {
@@ -52,15 +56,15 @@ module.exports = {
         }
         return {embed};
     },
-    sendEmbed: function (msg, gameText) {
+    sendEmbed: function (gmsg, msg, gameText) {
         var gameMessage = new Promise(function (resolve, reject) {
             let message = module.exports.createEmbed(msg.author.username + "'s Game", false, gameText);
-            if (!gameMessage){
+            if (!gmsg){
                 msg.channel.send(message).then(bmsg => {
                     resolve(bmsg);
                 });
             } else {
-                gameMessage.edit(message).then(bmsg => {
+                gmsg.edit(message).then(bmsg => {
                     resolve(bmsg);
                 });
             }

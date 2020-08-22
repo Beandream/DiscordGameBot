@@ -1,33 +1,28 @@
-const Controls = require('../controls.js');
+var grid = [];
 
 module.exports = {
-    loadGame: function (msg, gmsg) {
+    loadGame: function () {
         console.log("Game Default Loading...");
-        if (!gmsg) {return}
-        setup(msg, gmsg);
+        grid = createGrid();
+        grid = updateGrid(grid, Math.floor(Math.random() * 10), Math.floor(Math.random() * 10), "⬜");
+        return convertGrid(grid);
+    },
+    updateGame: function (action) {
+        return moveCube(action);
+    }, getActions: function () {
+        return ['⬆️', '⬇️', '⬅️', '➡️'];
     }
 }
 
-var grid = [];
-var gameMessage;
-
-function setup(msg, gmsg) {
-    gameMessage = gmsg;
-
-    grid = createGrid();
-    grid = updateGrid(grid, Math.floor(Math.random() * 10), Math.floor(Math.random() * 10), "⬜");
-
-        gameMessage.edit(Controls.createEmbed(msg.author.username + "'s Game", false, txtgrid)).then(bmsg => {
-            gameMessage = bmsg;
-            Controls.react(gameMessage, msg,  ['⬆️', '⬇️', '⬅️', '➡️']).then(function(result) {
-                gameMessage.reactions.removeAll().then(e => {
-                    moveCube(result, msg);
-                }).catch(error => {
-                    console.error('Failed to clear reactions: ', error);
-                    moveCube(result, msg);
-                });
-            });
-        });
+function convertGrid(lines) {
+    var text = "";
+    lines.forEach(y => {
+        y.forEach(x => {
+            text += x;
+        })
+        text += "\n"
+    });
+    return text;
 }
 
 function createGrid() {
@@ -56,7 +51,7 @@ function updateGrid(grid, y, x, type) {
     return lines;
 }
 
-function moveCube(direction, msg) {
+function moveCube(direction) {
     var y;
     var x;
 
@@ -70,23 +65,29 @@ function moveCube(direction, msg) {
         }
     }
 
-    if (direction == 0) {
-        if (y > 0) {
-            y -= 1;
-        }
-    } else if (direction == 1) {
-        if (y < 11) {
-            y += 1;
-        }
-    } else if (direction == 2) {
-        if (x > 0) {
-            x -= 1;
-        }
-    } else if (direction == 3){
-        if (x < 11) {
-            x += 1;
-        }
+    switch(direction) {
+        case 0:
+            if (y > 0) {
+                y -= 1;
+            }
+        break;
+        case 1:
+            if (y < 11) {
+                y += 1;
+            }
+        break;
+        case 2:
+            if (x > 0) {
+                x -= 1;
+            }
+        break;
+        case 3:
+            if (x < 11) {
+                x += 1;
+            }
+        break;
     }
+
     grid = updateGrid(grid, y, x, "⬜");
-    sendGameEmbed(msg, convertGrid(grid));
+    return convertGrid(grid);
 }
