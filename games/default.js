@@ -9,8 +9,12 @@ module.exports = {
     },
     updateGame: function (action) {
         return moveCube(action);
-    }, getActions: function () {
-        return ['⬆️', '⬇️', '⬅️', '➡️'];
+    }, info: function () {
+        return {
+            actions: ['⬆️', '⬇️', '⬅️', '➡️'],
+            name: "Default Game",
+            emoji: ":regional_indicator_d:"
+        };
     }
 }
 

@@ -12,7 +12,7 @@ var gameMessage; //The actual message in discord that is displaying the game.
 
 function setup(msg) {
     gameMessage = null; //resets the game
-    Controls.sendEmbed(gameMessage, msg, "Pick a game\n :regional_indicator_d: = DefaultGame").then(gmsg => {
+    Controls.sendEmbed(gameMessage, msg, "Pick a game\n" + defaultGame.info().emoji + " = " + defaultGame.info().name).then(gmsg => {
         gameMessage = gmsg;
         Controls.react(gmsg, msg, ['🇩', '🇧']).then(result => {
             startGame(msg, result);
@@ -35,7 +35,7 @@ function startGame(msg, game) {
 }
 
 function game0(msg) {
-    Controls.react(gameMessage, msg, defaultGame.getActions()).then(result => {
+    Controls.react(gameMessage, msg, defaultGame.info().actions).then(result => {
         Controls.sendEmbed(gameMessage, msg, defaultGame.updateGame(result)).then(gmsg => {
             gameMessage = gmsg;
             game0(msg);
