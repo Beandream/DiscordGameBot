@@ -1,19 +1,27 @@
 var grid = [];
+var points = 0;
 
 module.exports = {
     loadGame: function () {
         console.log("Game Default Loading...");
+        points = 0;
+        grid = [];
         grid = createGrid();
-        grid = updateGrid(grid, Math.floor(Math.random() * 10), Math.floor(Math.random() * 10), "⬜");
-        return convertGrid(grid);
+        let playerPos = {
+            x:Math.floor(Math.random() * 10),
+            y: Math.floor(Math.random() * 10)
+        }
+        grid = updateGrid(grid, playerPos.y, playerPos.x, "⬜");
+        grid = movePointCube(grid, playerPos.y, playerPos.x);
+        return convertGrid(grid) + "\n Points: " + points;
     },
     updateGame: function (action) {
-        return moveCube(action);
+        return moveCube(action) + "\n Points: " + points;
     }, info: function () {
         return {
             actions: ['⬆️', '⬇️', '⬅️', '➡️'],
             name: "Default Game",
-            emoji: ":regional_indicator_d:"
+            emoji: "🇩"
         };
     }
 }
@@ -92,6 +100,23 @@ function moveCube(direction) {
         break;
     }
 
+    if (grid[y][x] == "🟥") {
+        grid = updateGrid(grid, y, x, "⬜");
+        grid = movePointCube(grid, y, x);
+    }
+
     grid = updateGrid(grid, y, x, "⬜");
     return convertGrid(grid);
+}
+
+function movePointCube(grid, y, x) {
+    let a =  Math.floor(Math.random() * 10);
+    let b =  Math.floor(Math.random() * 10);
+    if (a == x && y == b) {
+        movePointCube();
+    } else {
+        grid = updateGrid(grid, b, a, "🟥");
+        points++;
+        return grid;
+    }
 }

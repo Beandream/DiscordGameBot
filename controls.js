@@ -1,11 +1,12 @@
 module.exports = {
     react: function (gmsg, msg, options) {
+
         const filter = (reaction, user) => {
             return options.includes(reaction.emoji.name) && user.id === msg.author.id;
         };
 
-        var result = new Promise(function (resolve, reject) {
-            
+        var result = new Promise(function (resolve) {
+
             let i = 0;
             reactAll(options[i]);
 
@@ -19,7 +20,7 @@ module.exports = {
                     }
                 }).catch(err => {console.log(err)});
             }
-    
+
             function awaitReactions(gmsg, filter, msg, options) {
                 gmsg.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
                 .then(collected => {
@@ -37,7 +38,8 @@ module.exports = {
                     }
                 })
                 .catch(collected => {
-                    msg.channel.send('Game Stopped Due to inactivity');
+                    gmsg.edit(module.exports.createEmbed(false, 9911111, 'Game Stopped Due to inactivity'));
+                    gmsg.reactions.removeAll().catch(e => console.log(e));
                 });
             }
 
@@ -45,20 +47,24 @@ module.exports = {
 
         return result;
     },
-    createEmbed: function (title, color, description) {
+    createEmbed: function (title, color, description, footer) {
         if (!title){title = "Discord Bot Game"};
         if (!color) {color = 7339251};
-        if (!description) { "GameLoading" };
+        if (!description) {description = "An Awesome Bot built by BeanDream."};
+        if (!footer) {footer = "~Designed by BeanDream"};
         var embed = {
             "title": title,
             "color": color,
-            "description":description
+            "description": description,
+            "footer": {
+                "text": footer
+            }
         }
         return {embed};
     },
-    sendEmbed: function (gmsg, msg, gameText) {
+    sendEmbed: function (gmsg, msg, gameText, gameTitle, color) {
         var gameMessage = new Promise(function (resolve, reject) {
-            let message = module.exports.createEmbed(msg.author.username + "'s Game", false, gameText);
+            let message = module.exports.createEmbed(gameTitle, color, gameText, msg.author.username + "'s Game");
             if (!gmsg){
                 msg.channel.send(message).then(bmsg => {
                     resolve(bmsg);

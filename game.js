@@ -1,5 +1,8 @@
+const TicTacToe = require('./games/tictactoe.js');
 const defaultGame = require('./games/default.js');
 const Controls = require('./controls.js');
+
+var games = [defaultGame, TicTacToe];
 
 module.exports = {
     loadGame: function (msg) {
@@ -7,38 +10,42 @@ module.exports = {
     }
 }
 
-var gameMessage; //The actual message in discord that is displaying the game.
-
-
 function setup(msg) {
-    gameMessage = null; //resets the game
-    Controls.sendEmbed(gameMessage, msg, "Pick a game\n" + defaultGame.info().emoji + " = " + defaultGame.info().name).then(gmsg => {
-        gameMessage = gmsg;
-        Controls.react(gmsg, msg, ['🇩', '🇧']).then(result => {
-            startGame(msg, result);
+    Controls.sendEmbed(null, msg, "Pick a game" + gameList()).then(gameMsg => {
+        Controls.react(gameMsg, msg, gameList(true)).then(result => {
+            startGame(gameMsg, msg, result);
         })
     });
 }
 
-function startGame(msg, game) {
-    switch(game) {
-        case 0:
-        Controls.sendEmbed(gameMessage, msg, defaultGame.loadGame(msg, gameMessage)).then(gmsg => {
-            gameMessage = gmsg;
-            game0(msg);
-        });
-        break;
-        case 1:
-            msg.channel.send("That game doesn't exsist yet... bruh");
-        break;
+function gameList(emojiList) {
+    if (emojiList) {
+        let emojis = [];
+        games.forEach(g => {
+            emojis.push(g.info().emoji);
+        })
+        return emojis;
+    } else {
+        let list = "";
+        games.forEach(g => {
+            list += "\n" + g.info().emoji + " = " + g.info().name;
+        })
+        return list
     }
 }
 
-function game0(msg) {
-    Controls.react(gameMessage, msg, defaultGame.info().actions).then(result => {
-        Controls.sendEmbed(gameMessage, msg, defaultGame.updateGame(result)).then(gmsg => {
-            gameMessage = gmsg;
-            game0(msg);
+function startGame(gameMsg, msg, gameNumber) {
+    let game = games[gameNumber];
+
+    Controls.sendEmbed(gameMsg, msg, game.loadGame(), game.info().name).then(gmsg => {
+        gameLoop(gmsg, msg, game);
+    });
+}
+
+function gameLoop(gameMsg, playerMsg, game) {
+    Controls.react(gameMsg, playerMsg, game.info().actions).then(result => {
+        Controls.sendEmbed(gameMsg, playerMsg, game.updateGame(result), game.info().name).then(gmsg => {
+            gameLoop(gmsg, playerMsg, game);
         });
     })
 }
