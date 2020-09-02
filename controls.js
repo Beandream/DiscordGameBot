@@ -5,35 +5,50 @@ module.exports = {
             return options.includes(reaction.emoji.name) && user.id === msg.author.id;
         };
 
+        gmsg.reactions.cache.forEach(r => {
+            if (!options.includes(r._emoji.name)){
+                r.remove().catch(e => console.log(e));
+            }
+        })
+
         var result = new Promise(function (resolve) {
 
             let i = 0;
             reactAll(options[i]);
 
             function reactAll(e) {
-                gmsg.react(e).then(() => {
+                if (!gmsg.reactions.cache.get(e)){
+                    gmsg.react(e).then(() => {
+                        i++;
+                        if (i < options.length) {
+                            reactAll(options[i]);
+                        } else {
+                            awaitReactions(gmsg, filter, msg, options);
+                        }
+                    }).catch(err => {console.log(err)});
+                } else {
                     i++;
                     if (i < options.length) {
                         reactAll(options[i]);
                     } else {
                         awaitReactions(gmsg, filter, msg, options);
                     }
-                }).catch(err => {console.log(err)});
+                }
             }
 
             function awaitReactions(gmsg, filter, msg, options) {
+                console.log("awaiting Reactions now!");
                 gmsg.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
                 .then(collected => {
                     const reaction = collected.first();
                     
                     for(let i = 0; i < options.length; i++) {
                         if (reaction.emoji.name === options[i]) {
-                            gmsg.reactions.removeAll().then(e => {
-                                resolve(i);
-                            }).catch(error => {
-                                console.error('Failed to clear reactions: ', error);
-                                resolve(i);
-                            });
+                            collected.forEach(c => {
+                                c.remove().then(() => {
+                                    resolve(i);
+                                }).catch(e => console.log(e));
+                            })
                         }
                     }
                 })
