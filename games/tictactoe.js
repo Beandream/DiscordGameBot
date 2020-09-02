@@ -24,6 +24,9 @@ var grid;
 var win = false;
 
 function play() {
+    if (win == true) {
+        return;
+    }
     let slots = [];
     grid.forEach(function(g, i){
         if (g == "🔲") {
@@ -56,48 +59,39 @@ function updateGrid(pos, type) {
         }
         grid[j] = type;
         actions.splice(pos, 1);
-        if (actions.length < 1) {
-            actions.push("✔️");
+        let w = checkWin(grid);
+        if (w) {
+            grid = [w, w, w, w, w, w, w, w, w];
+            actions = [("✔️")];
+            win = true;
+        } else if (actions.length < 1) {
+            actions = [("✔️")];
             win = true;
         }
-
-        // if (pos == 0) {
-        //     if (grid[pos] == "🔲") {
-        //         grid[pos] = type;
-        //         actions.splice(pos, 1);
-        //     } else {
-        //         console.log("spot " + pos + " was already taken");
-        //     }
-        // } else {
-        //     let j = pos;
-        //     for (let i = 0; i < j; i++) {
-        //         if (grid[i] != "🔲") {
-        //             if (j < 7) {
-        //                 j++;
-        //             }                
-        //         }
-        //         console.log(i + " Is this Zero?")
-        //     }
-        // }
-
-        // let j = pos;
-        // for (let i = 0; i <= j; i++) {
-        //     if (grid[i] != "🔲") {
-        //         if (j < 7) {
-        //             j++;
-        //         }                
-        //     }
-        //     console.log(i + " Is this Zero?")
-        // }
-
-        // if (grid[pos + j] == "🔲") {
-        //     grid[pos + j] = type;
-        //     actions.splice(pos, 1);
-        // } else {
-        //     console.log("We had an Error. Rip");
-        // }
     } else {
         console.log("something didn't exsist.");
+    }
+}
+
+function checkWin(grid) {
+    if (grid[0] != "🔲" && grid[0] == grid[1] && grid[1] == grid[2]) {
+        return grid[0];
+    } else if (grid[3] != "🔲" && grid[3] == grid[4] && grid[4] == grid[5]){
+        return grid[3];
+    } else if (grid[6] != "🔲" && grid[6] == grid[7] && grid[7] == grid[8]){
+        return grid[6];
+    } else if (grid[0] != "🔲" && grid[0] == grid[3] && grid[3] == grid[6]) {
+        return grid[0];
+    } else if (grid[1] != "🔲" && grid[1] == grid[4] && grid[4] == grid[7]){
+        return grid[1];
+    } else if (grid[2] != "🔲" && grid[2] == grid[5] && grid[5] == grid[8]){
+        return grid[2];
+    }else if (grid[0] != "🔲" && grid[0] == grid[4] && grid[4] == grid[8]) {
+        return grid[0];
+    } else if (grid[2] != "🔲" && grid[2] == grid[4] && grid[4] == grid[6]){
+        return grid[2];
+    } else {
+        return false;
     }
 }
 

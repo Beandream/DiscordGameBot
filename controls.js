@@ -37,7 +37,6 @@ module.exports = {
             }
 
             function awaitReactions(gmsg, filter, msg, options) {
-                console.log("awaiting Reactions now!");
                 gmsg.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
                 .then(collected => {
                     const reaction = collected.first();
